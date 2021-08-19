@@ -1,34 +1,24 @@
-from machine import Pin, PWM  # you may ignore the interpreter error re PWM on pycharm.
+from machine import Pin, PWM, Timer  # you may ignore the interpreter error re PWM on pycharm.
 import utime
 
-# based on https://www.explainingcomputers.com/sample_code/Servo_Test.py
 # PIN SETUP:
-#   servo red should always go to 5v (servos use 4.8-6v. Note: strong servos should be powered via a dedicated power supply)
-#   servo black should go to ground
-#   servo PWM signal should be on a PWM pin, e.g. GP0 in current example
-
-# .duty_16(#) takes values of 0 to 65535 for duty cycle of 0 to 100
-# SG90 servo has 2 per cent duty cycle for 0 degrees, 12 per cent for 180.
-# So a .duty_u16 value of c.1350 is zero degrees; 8200 is 180 degrees.
+#   servo white (signal) to pin 0 (red to 5v black to GND)
+#   resistor (220-500 Ohm) to pin 14, and then to led. led is connected to GND)
 
 servo = PWM(Pin(0))
-
 servo.freq(50)
 
-while True:
-    # Move servo to zero degrees (2 per cent duty cycle)
-    servo.duty_u16(3350)  # 1350 is the minimal position
-    utime.sleep(2)
-    # Move servo to 180 degrees (12 per cent duty cycle)
-    servo.duty_u16(7200)  # 8200 is maximal position
-    utime.sleep(2)
-    print("end of cycle")
+led = Pin(14, Pin.OUT)
+timer = Timer()
+timer2 = Timer()
 
-# some terminal comments: you can open the teminal on pycharm using Tools>MicroPython>MicroPython REPL
-# on the terminal you can use Ctrl+c to stop the loop. Ctrl+d to reboot.
-# stopping the loop does not reset PINs
-# so servo PWN signal will continue (servo will still feel hard), and servo duty command can be sent over the REPL >>>
-# this is different from a servo that is merely connected to voltage but has no signal.
-# you can simulate that same behavior by reverting to the Blink example (whlie keeping ther servo connected).
-# or by taking out the servo singal wire (white wire).
+def blink(timer):
+    led.toggle()
 
+def servomove(timer2):
+    servo.duty_u16(3350)  # 1350 is the minimal position 8200 is maximal position
+    utime.sleep(3)  # note that during this time the led does not blink. Why? how do we fix that?
+    servo.duty_u16(5300)
+
+timer.init(freq=6.5, mode=Timer.PERIODIC, callback=blink)
+timer2.init(freq=0.2, mode=Timer.PERIODIC, callback=servomove)
