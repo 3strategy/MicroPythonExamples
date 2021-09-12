@@ -1,37 +1,21 @@
-from machine import Pin, PWM, Timer  # you may ignore the interpreter error re PWM on pycharm.
-import utime
-# when you code is terminal intensive (you need the printouts) I find Thonny to be better suited.
-# Reminder: to open the terminal (REPL) from py charm: Tools>MicroPython>MicroPython REPL
+#This code is for ESP32 (all builds before were made and tested on PiPico).
+#Note that PyCharm has huge issues connecting and sending builds to the ESP32.
+#Use Thonny!!!
+from machine import Pin
+import time
 
-# PIN SETUP:
-#   servo white (signal) to pin 0 (red to 5v black to GND)
-#   resistor (220-500 Ohm) to pin 14, and then to led. led is connected to GND)
-#   push switch connected to pin 5 and 3.3v.
-#     ->for more details about setting up the switch see https://youtu.be/TDj2kcSA-68?t=335
+led = Pin(2, Pin.OUT)  # similar setting of pin 25 to OUTPUT
+                        # note that such a function returns an object, but also modifies this object.
+                        # this is more Object Oriented than the comparable Arduino blink native code
+sw = Pin(0, Pin.IN)
 
-servo = PWM(Pin(0))
-servo.freq(50)
-
-led = Pin(14, Pin.OUT)
-
-switch = Pin(5, Pin.IN, Pin.PULL_DOWN)  # pulling down the pin is important.
-
-timer = Timer()
-timer2 = Timer()
-
-def blink(timer):
-    led.toggle()
-
-def servomove(timer2):
-    servo.duty_u16(4500)  # 1350 is the minimal position 8200 is maximal position
-    utime.sleep(3)  # note that during this sleep time the led does not blink.
-                    # and the switch status does not print.
-                    # HOMEWORK: Why? how do we fix that?
-    servo.duty_u16(5000)
-
-timer.init(freq=6.5, mode=Timer.PERIODIC, callback=blink)
-timer2.init(freq=0.2, mode=Timer.PERIODIC, callback=servomove)
+# another example of blinking the internal led.
+# previous code was from https://github.com/raspberrypi/pico-micropython-examples/blob/master/blink/blink.py#L1-L9
+# this version is from https://themachineshop.uk/getting-started-with-the-pi-pico-and-pycharm/
 
 while True:
-    print(switch.value())  # notice again how this DOES NOT WORK when the servo function is "busy working".
-    utime.sleep(0.1)
+    led(1)
+    time.sleep(0.5)  # this sleep code better resembles the more traditional MCU c code
+    led(0)
+    time.sleep(0.1)
+    print(sw.value(),'ggg')
